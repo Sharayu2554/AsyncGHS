@@ -1,5 +1,7 @@
 package ghs.message;
 
+import floodmax.MessageType;
+
 import java.util.Objects;
 
 /**
@@ -21,12 +23,14 @@ public class Test extends Message implements Comparable {
         super(sender, receiver, round);
         this.coreEdgeWeight = coreEdgeWeight;
         this.level = level;
+        this.setType(MessageType.TEST);
     }
 
     public Test(Integer sender, Integer receiver, Integer coreEdgeWeight, Integer level) {
         super(sender, receiver);
         this.coreEdgeWeight = coreEdgeWeight;
         this.level = level;
+        this.setType(MessageType.TEST);
     }
 
 

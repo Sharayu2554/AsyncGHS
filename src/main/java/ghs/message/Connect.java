@@ -1,5 +1,7 @@
 package ghs.message;
 
+import floodmax.MessageType;
+
 /**
  * A connect message is sent across the mwoe of a component C when that component attempts to combine with another
  * component.
@@ -13,5 +15,6 @@ public class Connect extends Message {
     public Connect(Integer sender, Integer receiver,  Integer level) {
         super(sender, receiver);
         this.level = level;
+        this.setType(MessageType.CONNECT);
     }
 }

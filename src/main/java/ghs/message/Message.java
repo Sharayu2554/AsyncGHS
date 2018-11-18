@@ -1,6 +1,7 @@
 package ghs.message;
 
 import java.util.Objects;
+import floodmax.MessageType;
 
 /**
  * Represents the format of a message to be sent in the network.
@@ -12,6 +13,7 @@ public abstract class Message implements Comparable  {
     private Integer sender;
     private Integer receiver;
     private Integer round;
+    private MessageType type;
 
     public Message(Integer sender, Integer receiver, Integer round) {
         this.sender = sender;
@@ -22,6 +24,13 @@ public abstract class Message implements Comparable  {
     public Message(Integer sender, Integer receiver) {
         this.sender = sender;
         this.receiver = receiver;
+    }
+    public MessageType getType() {
+        return type;
+    }
+
+    public void setType(MessageType type) {
+        this.type = type;
     }
 
     public Integer getSender() {

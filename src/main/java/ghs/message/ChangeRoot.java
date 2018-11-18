@@ -1,5 +1,7 @@
 package ghs.message;
 
+import floodmax.MessageType;
+
 /**
  * A changeroot message is sent from the leader of the component toward the component process that is adjacent to the
  * component's mwoe, aftet the mwoe has been determined.
@@ -13,6 +15,7 @@ public class ChangeRoot extends Message {
     public ChangeRoot(Integer sender, Integer receiver, Integer newLeader) {
         super(sender, receiver);
         this.newLeader = newLeader;
+        this.setType(MessageType.CHANGEROOT);
     }
 
 }

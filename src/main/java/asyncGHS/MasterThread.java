@@ -1,5 +1,7 @@
 package asyncGHS;
 
+import edu.princeton.cs.algs4.Edge;
+import edu.princeton.cs.algs4.EdgeWeightedGraph;
 import floodmax.MessageType;
 import ghs.message.MasterMessage;
 import ghs.message.Message;
@@ -20,25 +22,25 @@ public class MasterThread extends Thread {
     BlockingQueue<MasterMessage> queue = new LinkedBlockingDeque<>();
     private HashSet<Integer> roundCompletedThreads = new HashSet<>();   // threads that finished current round
     private HashSet<Integer> terminatedThreads = new HashSet<Integer>();
-    private Map<Integer, List<NeighborObject>> graph;
+    private EdgeWeightedGraph graph;
     private Map<Integer, HashSet<Integer>> parentToNodeMap;
 
-    public MasterThread(String name, int id, Map<Integer, List<NeighborObject>> graph) {
+    public MasterThread(String name, int id, EdgeWeightedGraph graph) {
         super(name);
         this.graph = graph;
-        this.barrier = new CyclicBarrier(this.graph.size());
+        this.barrier = new CyclicBarrier(this.graph.V());
         this.parentToNodeMap = new HashMap<>();
     }
 
     private void spawnWorkers() {
-        int numProcesses = this.graph.keySet().size();
+        int numProcesses = this.graph.V();
         Process[] processes = new Process[numProcesses];
 
         // spawn processes
         //NodeIdProcessMap<Key, Value> : process Key is stored in value location of Processes Array
         int index = 0;
         Map<Integer, Integer> nodeIdToProcessMap = new HashMap<>();
-        for (Integer vertexId : this.graph.keySet()) {
+        for (Integer vertexId = 0;vertexId < numProcesses;vertexId++ ) {
             processes[index] = new Process("thread-" + vertexId, vertexId, barrier);
             nodeIdToProcessMap.put(vertexId, index);
             index += 1;
@@ -49,13 +51,18 @@ public class MasterThread extends Thread {
             // get vertex id of i-th worker
             Integer vertexId = processes[i].getUid();
             // get neighbours of this vertex
-            List<NeighborObject> neighbors = this.graph.get(vertexId);
+            Iterable<Edge> neighbors = this.graph.adj(vertexId);
             // get workers that correspond to these neighborProcesses
-            HashMap<NeighborObject, Process> adjacentProcesses = new HashMap<>();
+            /*HashMap<NeighborObject, Process> adjacentProcesses = new HashMap<>();
             for (NeighborObject neighborObject : neighbors) {
                 adjacentProcesses.put(neighborObject, processes[nodeIdToProcessMap.get(neighborObject.getId())]);
+            }*/
+            HashMap <Edge, Process> neighborProcesses = new HashMap<>();
+            for (Edge edge: neighbors) {
+                int neighborId = edge.either() == vertexId ? edge.other(vertexId) : edge.either();
+                neighborProcesses.put(edge, processes[nodeIdToProcessMap.get(neighborId)]);
             }
-            processes[i].setNeighborProcesses(adjacentProcesses);
+            processes[i].setNeighborProcesses(neighborProcesses);
             processes[i].setMaster(this);
         }
 

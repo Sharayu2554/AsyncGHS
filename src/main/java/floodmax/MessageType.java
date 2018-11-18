@@ -7,5 +7,12 @@ public enum MessageType {
     END_ROUND, // process sends to master to notify that it has completed its round
     START_ROUND, // master sends to process to give green signal to start round
     TERMINATE, // process sends this to master to signal that it is done and can shut down,
-    KILL // to kill worker threads
+    KILL, // to kill worker threads
+    ACCEPT,
+    CHANGEROOT,
+    CONNECT,
+    INITIATE,
+    REJECT,
+    REPORT,
+    TEST
 }

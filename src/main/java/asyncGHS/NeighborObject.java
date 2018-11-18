@@ -28,9 +28,7 @@ public class NeighborObject {
 
     @Override
     public String toString() {
-        return "NeighborObject{" +
-                "id=" + id +
-                ", weight=" + weight +
+        return "NeighborObject{" + ", weight=" + weight +
                 '}';
     }
 }

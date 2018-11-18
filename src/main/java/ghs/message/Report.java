@@ -1,5 +1,7 @@
 package ghs.message;
 
+import floodmax.MessageType;
+
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -22,6 +24,7 @@ public class Report extends Message implements Comparable {
         super(sender, receiver, round);
         this.mwoeWeight = mwoeWeight;
         this.pathToMWOE = new LinkedList<>();
+        this.setType(MessageType.REPORT);
     }
 
     /**

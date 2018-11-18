@@ -1,7 +1,9 @@
 package asyncGHS;
 
 
+import edu.princeton.cs.algs4.Edge;
 import floodmax.MessageType;
+import ghs.message.Initiate;
 import ghs.message.MasterMessage;
 import ghs.message.Message;
 import ghs.message.Report;
@@ -20,26 +22,33 @@ public class Process extends Thread{
     private int round = 0;  // initially round is 0, but everything starts from round 1 (master sends this)
     private int parentId = -1;
     private boolean selfKill = false;
-
+    private int level;
     private CyclicBarrier barrier;
+    private HashSet<Integer> children = new HashSet<>();
+
+    private boolean leader;
 
     BlockingQueue<Message> inqueue = new PriorityBlockingQueue<>(30, Message::compareTo);
     BlockingQueue<Message> queue = new PriorityBlockingQueue<>(30, Message::compareTo);
     BlockingQueue<Message> masterQueue = new LinkedBlockingDeque<>(10);
     private MasterThread master;
-
+    private NeighborObject core;
     //neighbor and its process
     private Map<Integer, Process> vertexToProcess = new HashMap<>();
     private Map<Integer, Integer> vertexToDelay = new HashMap<>();
-
-
-    private HashSet<NeighborObject> neighbors = new HashSet<>();
+    private HashSet<Edge> neighbors = new HashSet<>();
+    private HashSet<Edge> rejected = new HashSet<>();
+    private HashSet<Edge> branch = new HashSet<>();
 
     public Process(String name, int uid, CyclicBarrier barrier) {
         super(name);
         this.uid = uid;
         this.barrier = barrier;
+        this.leader = true;
+        this.level = 0;
+        this.core = null;
     }
+
     public void setMaster(MasterThread master) {
         this.master = master;
     }
@@ -49,11 +58,12 @@ public class Process extends Thread{
     }
 
 
-    public void setNeighborProcesses(HashMap<NeighborObject, Process> neighborProcesses) {
-        for (NeighborObject p : neighborProcesses.keySet()) {
-            neighbors.add(p);
-            vertexToProcess.put(p.getId(), neighborProcesses.get(p));
-            vertexToDelay.put(p.getId(), 0);
+    public void setNeighborProcesses(HashMap<Edge, Process> neighborProcesses) {
+        for (Edge edge : neighborProcesses.keySet()) {
+            Process p = neighborProcesses.get(edge);
+            neighbors.add(edge);
+            vertexToProcess.put(p.getUid(), p);
+            vertexToDelay.put(p.getUid(), 0);
         }
     }
 
@@ -129,8 +139,9 @@ public class Process extends Thread{
 
     private void message() {
         // defining messages
-        if (round <= 3) {
-            sendMessages(neighbors);
+
+        if(isLeader()) {
+            broadCastToChildren();
         }
     }
 
@@ -138,7 +149,9 @@ public class Process extends Thread{
         Message msg;
         while (!queue.isEmpty()) {
             msg = queue.take();
-            log.info(msg);
+            if(msg.getType() == MessageType.INITIATE) {
+
+            }
         }
     }
 
@@ -157,11 +170,10 @@ public class Process extends Thread{
                 if (selfKill) {
                     break;
                 }
-
                 message();
                 transition();
 
-                if (round == 70) {
+                if (round == 10) {
                     sendTerminationToMaster();
                 }
                 else {
@@ -173,6 +185,24 @@ public class Process extends Thread{
         } catch (BrokenBarrierException e) {
             e.printStackTrace();
         }
+    }
+
+    private void broadCastToChildren() {
+        if(branch.size() == 0) {
+            pushToInQueue(new Initiate(this.getUid(), this.getUid(), null, this.level));
+        }
+        else {
+            for (Edge edge: neighbors) {
+                Integer neighborId = edge.other(this.getUid());
+                Process neighborProcess = vertexToProcess.get(neighborId);
+                Message msg = new Initiate(this.getUid(), this.getUid(), null, this.level);
+                pushToInQueue(msg);
+            }
+        }
+    }
+
+    private boolean isLeader() {
+        return this.leader;
     }
 
     @Override

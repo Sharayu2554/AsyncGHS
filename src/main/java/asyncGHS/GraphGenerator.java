@@ -1,10 +1,13 @@
 package asyncGHS;
 
+import edu.princeton.cs.algs4.Edge;
+import edu.princeton.cs.algs4.EdgeWeightedGraph;
+
 import java.util.*;
 
 public class GraphGenerator {
     private Map<Integer, List<NeighborObject>> adj = new HashMap<>();
-
+    private EdgeWeightedGraph graph;
     public GraphGenerator() {
         /**
          * Generates a graph of provided size using random integers.
@@ -50,8 +53,8 @@ public class GraphGenerator {
 
     }
 
-    public GraphGenerator(Map<Integer, List<NeighborObject>> adj) {
-        this.adj = adj;
+    public GraphGenerator(EdgeWeightedGraph graph) {
+        this.graph= graph;
     }
 
     public Map<Integer, List<NeighborObject>> getAdj() {
@@ -74,5 +77,9 @@ public class GraphGenerator {
             }
             System.out.println("");
         }
+    }
+
+    public Iterable<Edge> getEdges() {
+        return this.graph.edges();
     }
 }
