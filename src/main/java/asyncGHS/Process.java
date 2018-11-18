@@ -126,22 +126,24 @@ public class Process extends Thread{
         pushToQueue(master, new MasterMessage(uid, parentId, MessageType.TERMINATE));
     }
 
-    private void sendMessages(HashSet<NeighborObject> neighbors) {
-        for (NeighborObject neighbor : neighbors) {
-            int round = getRound(neighbor.id);
-            Message testMsg = new Test(uid, neighbor.id, round, 0, 1);
+
+    private int getNeighborId (Edge edge) {
+        return edge.either() == this.getUid() ? edge.other(this.getUid()) : edge.either();
+    }
+
+    private void sendMessages(HashSet<Edge> neighbors) {
+        for(Edge neighbor: neighbors) {
+            int neighborId = getNeighborId(neighbor);
+            int round = getRound(neighborId);
+            Message testMsg = new Test(uid, neighborId, round, 0, 1);
             pushToInQueue(testMsg);
-//            round = getRound(neighbor.id);
-//            Message reportmsg = new Report(uid, neighbor.id, round, 0);
-//            pushToInQueue(reportmsg);
         }
     }
 
     private void message() {
         // defining messages
-
-        if(isLeader()) {
-            broadCastToChildren();
+        if(round <= 3) {
+            sendMessages(neighbors);
         }
     }
 
